@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         MODIE: Super Another (Legit & Stealth)
 // @namespace    http://tampermonkey.net/
-// @version      3.6
-// @description  Features +  Stability (Ghost Fix & Smooth Bhop)
+// @version      3.7
+// @description  V3.7 Smart ESP (Dynamic Box & Filter)
 // @author       Spectral.
 // @match        *://krunker.io/*
 // @match        *://browserfps.com/*
@@ -103,7 +103,7 @@ const menuCSS = `
 function createGUI() {
     const style = document.createElement('style'); style.innerHTML = menuCSS; document.head.appendChild(style);
     const gui = document.createElement('div'); gui.className = 'modie-menu';
-    gui.innerHTML = `<div class="modie-header" id="modie-header">MODIE V3.6</div><div id="modie-content"></div><div class="footer">[F1] or ["] (Esc Under) to Hide</div>`;
+    gui.innerHTML = `<div class="modie-header" id="modie-header">MODIE V3.7</div><div id="modie-content"></div><div class="footer">[F1] or ["] (Esc Under) to Hide</div>`;
     document.body.appendChild(gui); renderItems(gui.querySelector('#modie-content')); return gui;
 }
 
@@ -133,8 +133,8 @@ function formatName(str) { return str.replace(/([A-Z])/g, ' $1').replace(/^./, s
 function updatePlayerCount(count) {
     const el = document.getElementById('modie-header');
     if (el) {
-        if (!scene) el.innerHTML = `MODIE V3.6 <span style="color:#ff5555;">(Injecting...)</span>`;
-        else el.innerHTML = `MODIE V3.6 <span style="color:#fff; font-size:10px;">(Players: ${count})</span>`;
+        if (!scene) el.innerHTML = `MODIE V3.7 <span style="color:#ff5555;">(Injecting...)</span>`;
+        else el.innerHTML = `MODIE V3.7 <span style="color:#fff; font-size:10px;">(Players: ${count})</span>`;
     }
 }
 
@@ -169,7 +169,7 @@ const COL_ENEMY = 0xff0055;
 const COL_TEAM = 0x00aaff;
 const espMap = new Map();
 
-const boxGeo = new THREE.EdgesGeometry(new THREE.BoxGeometry(5, 15, 5).translate(0, 7.5, 0));
+const boxGeo = new THREE.EdgesGeometry(new THREE.BoxGeometry(1, 1, 1).translate(0, 0.5, 0)); // Unit Box (0 to 1 Y)
 const boxMatEnemy = new THREE.LineBasicMaterial({ color: COL_ENEMY, depthTest: false, depthWrite: false, transparent: true, opacity: 0.9 });
 const boxMatTeam = new THREE.LineBasicMaterial({ color: COL_TEAM, depthTest: false, depthWrite: false, transparent: true, opacity: 0.5 });
 
@@ -219,9 +219,8 @@ function isValidPlayer(obj) {
     tempBox.getSize(tempSize);
 
     // Krunker Player Height is roughly 11-13 units
-    // Min Height 7.5 helps filter small props/sprays without being too strict
-    // Lowered to 4.5 to catch crouched players
-    if (tempSize.y < 4.5 || tempSize.y > 25) return false;
+    // Min Height 6.5 filters out almost all props (Crouch is ~8)
+    if (tempSize.y < 6.5 || tempSize.y > 25) return false;
     if (tempSize.x < 1.5 || tempSize.z < 1.5) return false; // Too thin
 
     return true;
@@ -410,6 +409,10 @@ function animate() {
         });
 
         // --- ESP ---
+        // Recalculate Bounding Box for "Smart Sizing"
+        tempBox.setFromObject(player);
+        tempBox.getSize(tempSize);
+
         let espData = espMap.get(player.uuid);
         if (!espData) {
             const group = new THREE.Group();
@@ -423,6 +426,16 @@ function animate() {
         if (espData.group) {
             espData.group.position.copy(player.position);
             espData.group.rotation.y = player.rotation.y;
+
+            // SMART SCALING: Resize Box to fit Player
+            // User Report: Boxes are too wide horizontally.
+            // Fix: Use dynamic HEIGHT (for crouch) but fixed WIDTH/DEPTH.
+            const boxW = 5.0; // Fixed Width
+            const boxH = tempSize.y; // Dynamic Height
+            const boxD = 5.0; // Fixed Depth
+
+            espData.box.scale.set(boxW, boxH, boxD);
+            // Unit Box (0,0.5,0) * H -> Bottom at 0, Top at H. Perfect.
 
             if (player === myPlayer || (player.position.x === myPlayer.position.x && player.position.z === myPlayer.position.z)) {
                 espData.group.visible = false;
@@ -445,11 +458,14 @@ function animate() {
                         if (espData.sprite) espData.group.remove(espData.sprite);
                         espData.sprite = createTextSprite(textContent, isTeammate);
                         espData.sprite.isTeam = isTeammate;
-                        espData.sprite.position.y = 20;
                         espData.group.add(espData.sprite);
                         espData.lastText = textContent;
                     }
-                    if (espData.sprite) espData.sprite.visible = true;
+                    if (espData.sprite) {
+                        espData.sprite.visible = true;
+                        // Position text above the dynamic box
+                        espData.sprite.position.y = boxH + 2.0;
+                    }
                 } else if (espData.sprite) {
                     espData.sprite.visible = false;
                 }
