@@ -4,8 +4,6 @@
 
     MODIE is a legit-focused, high-performance script for Krunker.io designed for stealth and utility. It features a robust Aimbot with visibility checks, improved ESP, and "Humanized" smoothing options to look natural.
 
-![Menu Preview](https://media.discordapp.net/attachments/1421205201670508666/1447329793770000454/image.png?ex=692ac868&is=692976e8&hm=46890333241d77d70444ce657c91c3d100063991206dc6cc4c98a58406159238&=&format=webp&quality=lossless&width=532&height=656) <!-- Menu Preview -->
-
 ## ✨ Key Features
 
 ### 🔫 Aimbot
@@ -15,9 +13,8 @@
 *   **Auto Scope:** Automatically scopes in when locking onto a target (Optional).
 
 ### 👁️ ESP (Extra Sensory Perception)
-*   **Dynamic Box ESP:** Boxes resize perfectly to match player stances (crouching vs standing).
+*   **Smart Boxes:** 3D Boxes that resize to fit the player (e.g. Crouching).
 *   **Info Display:** Shows `Name`, `Health`, and `Distance` clearly.
-*   **Wall Check Colors:** Different colors for visible vs invisible enemies.
 *   **Chams:** See enemies through walls with a ghostly overlay.
 *   **Wireframe:** Matrix-style wireframe mode.
 
