@@ -1,4 +1,4 @@
-# 🎯 MODIE V3.6 - Advanced Krunker.io Script
+# 🎯 MODIE V3.7 - Advanced Krunker.io Script
 
 > **Created by Spectral.**
 
@@ -10,7 +10,6 @@
 *   **Visibility Priority:** Targets visible enemies first. If no one is visible, it falls back to wall-banging the closest target.
 
 *   **Humanized Smoothing:** Optional smoothing to simulate real mouse movement.
-*   **Auto Scope:** Automatically scopes in when locking onto a target (Optional).
 
 ### 👁️ ESP (Extra Sensory Perception)
 *   **Smart Boxes:** 3D Boxes that resize to fit the player (e.g. Crouching).
