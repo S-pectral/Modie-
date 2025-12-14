@@ -19,7 +19,7 @@ try { delete window.THREE; } catch (e) { }
 
 const settings = {
     aimbotEnabled: false,
-    aimbotOnRightMouse: false,
+    aimbotOnRightMouse: true,
     aimbotWallCheck: true,
     espEnabled: true,
     espLines: false,
@@ -293,22 +293,8 @@ function animate() {
     let minWorldDist = Infinity;
     const screenCenter = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
 
-    if (targetPlayer) {
-        let valid = true;
-        if (!targetPlayer.parent) valid = false;
-        if (valid && targetPlayer.health <= 0) valid = false;
-
-        if (valid && myTeam != null && targetPlayer.team != null && targetPlayer.team == myTeam) valid = false;
-
-        if (valid && cam) {
-            const screenPos = toScreenPosition(targetPlayer, cam, window.innerWidth, window.innerHeight);
-            if (screenPos.z < 1) {
-                const dist = Math.sqrt(Math.pow(screenPos.x - screenCenter.x, 2) + Math.pow(screenPos.y - screenCenter.y, 2));
-                if (dist > 150) valid = false;
-            } else valid = false;
-        }
-        if (!valid) targetPlayer = null;
-    }
+    // Validating target is not needed if we re-scan every frame for closest
+    targetPlayer = null;
 
     tempObject.matrix.copy(myPlayer.matrix).invert();
     const activePlayerSet = new Set();
@@ -428,26 +414,22 @@ function animate() {
             }
         }
 
-        if (!targetPlayer) {
-            if (!isTeammate) {
-                if (settings.aimbotWallCheck && !player.visible) {
-                    continue;
-                }
+        if (!isTeammate) {
+            if (settings.aimbotWallCheck && !player.visible) {
+                continue;
+            }
 
-                if (cam) {
-                    const screenPos = toScreenPosition(player, cam, window.innerWidth, window.innerHeight);
-                    if (screenPos.z < 1) {
-                        const distToCrosshair = Math.sqrt(Math.pow(screenPos.x - screenCenter.x, 2) + Math.pow(screenPos.y - screenCenter.y, 2));
+            if (cam) {
+                const screenPos = toScreenPosition(player, cam, window.innerWidth, window.innerHeight);
+                if (screenPos.z < 1) {
+                    const distToCrosshair = Math.sqrt(Math.pow(screenPos.x - screenCenter.x, 2) + Math.pow(screenPos.y - screenCenter.y, 2));
 
-                        if (distToCrosshair < 150) {
-                            let score = distToCrosshair;
-
-                            if (!player.visible) score += 500;
-
-                            if (score < minWorldDist) {
-                                minWorldDist = score;
-                                targetPlayer = player;
-                            }
+                    if (distToCrosshair <= 150) {
+                        // Dist check (World Distance)
+                        const dist = player.position.distanceTo(myPlayer.position);
+                        if (dist < minWorldDist) {
+                            minWorldDist = dist;
+                            targetPlayer = player;
                         }
                     }
                 }
