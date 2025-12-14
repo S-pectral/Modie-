@@ -20,10 +20,9 @@ try { delete window.THREE; } catch (e) { }
 const settings = {
     aimbotEnabled: false,
     aimbotOnRightMouse: true,
-    aimbotWallCheck: true,
+    colEnemy: '#ff0055',
+    colTeam: '#00aaff',
     espEnabled: true,
-    espLines: false,
-    espNames: true,
     chams: true,
     wireframe: false,
     humanize: true,
@@ -35,18 +34,31 @@ const keyToSetting = {
     'KeyB': 'aimbotEnabled',
     'KeyL': 'chams',
     'KeyM': 'espEnabled',
-    'KeyN': 'espLines',
     'KeyK': 'wireframe',
-    'KeyP': 'spinbot',
-    'KeyO': 'thirdPerson',
-    'KeyT': 'autoReload',
     'KeyH': 'humanize',
-    'Numpad5': 'aimbotWallCheck',
     'Backquote': 'toggleMenu',
     'Digit9': 'fovCircle',
-    'KeyJ': 'espNames',
     'KeyU': 'aimbotOnRightMouse'
 };
+
+// --- Persistence & UI State ---
+function loadSettings() {
+    try {
+        const saved = localStorage.getItem('modie_settings');
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            Object.assign(settings, parsed);
+        }
+    } catch (e) { console.error("MODIE: Failed to load settings", e); }
+}
+
+function saveSettings() {
+    try {
+        localStorage.setItem('modie_settings', JSON.stringify(settings));
+    } catch (e) { console.error("MODIE: Failed to save settings", e); }
+}
+
+loadSettings(); // Load on startup
 
 function lerp(start, end, amt) {
     return (1 - amt) * start + amt * end;
@@ -73,35 +85,108 @@ const menuCSS = `
         display: none; padding: 10px; user-select: none; font-size: 11px;
     }
     .modie-header { font-size: 13px; font-weight: bold; color: #00ff88; border-bottom: 1px solid #00ff88; padding-bottom: 5px; margin-bottom: 8px; text-align: center; }
+    .modie-tabs { display: flex; margin-bottom: 8px; border-bottom: 1px solid #333; }
+    .modie-tab { flex: 1; text-align: center; padding: 4px; cursor: pointer; color: #888; background: #111; border: 1px solid #333; margin-right: 2px; }
+    .modie-tab.active-tab { background: #00ff88; color: #000; font-weight: bold; }
     .modie-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; padding: 3px; cursor: pointer; border-radius: 3px; }
     .modie-item:hover { background: rgba(0, 255, 136, 0.15); }
     .modie-key { color: #888; font-size: 10px; margin-right: 8px; width: 60px; text-align: right; }
     .on { color: #00ff88; } .off { color: #ff5555; }
     .footer { text-align: center; color: #666; margin-top: 5px; font-size: 9px; }
+    .collapsed #modie-content, .collapsed .footer, .collapsed .modie-tabs { display: none; }
+    .modie-toggle { cursor: pointer; color: #fff; font-weight: bold; margin-left: 5px; }
 `;
+
+let activeTab = 'Main';
+const settingsMap = {
+    'Main': ['aimbotEnabled', 'aimbotOnRightMouse', 'espEnabled', 'chams', 'wireframe', 'humanize'],
+    'Config': ['smoothSpeed', 'fovCircle', 'colEnemy', 'colTeam']
+};
 
 function createGUI() {
     const style = document.createElement('style'); style.innerHTML = menuCSS; document.head.appendChild(style);
     const gui = document.createElement('div'); gui.className = 'modie-menu';
-    gui.innerHTML = `<div class="modie-header" id="modie-header">MODIE V3.7</div><div id="modie-content"></div><div class="footer">[F1] or ["] (Esc Under) to Hide</div>`;
+
+    gui.innerHTML = `
+        <div class="modie-header" id="modie-header">
+            <span id="modie-title">MODIE V3.7</span>
+            <span class="modie-toggle" id="modie-toggle">[-]</span>
+        </div>
+        <div class="modie-tabs">
+            <div class="modie-tab active-tab" id="tab-Main">Main</div>
+            <div class="modie-tab" id="tab-Config">Config</div>
+        </div>
+        <div id="modie-content"></div>
+        <div class="footer">[F1] or ["] (Esc Under) to Hide</div>
+    `;
+
+    // Toggle Collapse
+    const header = gui.querySelector('#modie-header');
+    const toggleBtn = gui.querySelector('#modie-toggle');
+    header.onclick = (e) => {
+        if (e.target.id === 'modie-title' || e.target.id === 'modie-toggle' || e.target.id === 'modie-header') {
+            gui.classList.toggle('collapsed');
+            const isCollapsed = gui.classList.contains('collapsed');
+            toggleBtn.textContent = isCollapsed ? '[+]' : '[-]';
+        }
+    };
+
+    const tabMain = gui.querySelector('#tab-Main');
+    const tabConfig = gui.querySelector('#tab-Config');
+
+    function switchTab(tab) {
+        activeTab = tab;
+        tabMain.className = `modie-tab ${tab === 'Main' ? 'active-tab' : ''}`;
+        tabConfig.className = `modie-tab ${tab === 'Config' ? 'active-tab' : ''}`;
+        renderItems(gui.querySelector('#modie-content'));
+    }
+
+    tabMain.onclick = () => switchTab('Main');
+    tabConfig.onclick = () => switchTab('Config');
+
     document.body.appendChild(gui); renderItems(gui.querySelector('#modie-content')); return gui;
 }
 
 function renderItems(container) {
     container.innerHTML = '';
-    for (const key in settings) {
+    const keys = settingsMap[activeTab] || [];
+
+    for (const key of keys) {
+        if (settings[key] === undefined) continue;
+
         const item = document.createElement('div'); item.className = 'modie-item';
-        item.onclick = () => { settings[key] = !settings[key]; renderItems(container); };
         const keyBind = settingToKeyDisplay[key] ? `[${settingToKeyDisplay[key]}]` : '';
-        if (key === 'smoothSpeed') {
+
+        // Color Picker Logic
+        if (typeof settings[key] === 'string' && settings[key].startsWith('#')) {
+            item.innerHTML = `<span class="modie-key"></span><span style="flex-grow:1">${formatName(key)}</span><input type="color" value="${settings[key]}" style="width:40px; height:20px; border:none; background:none; cursor:pointer;" class="modie-color">`;
+            const input = item.querySelector('input');
+            item.onclick = (e) => { if (e.target !== input) input.click(); };
+            input.onclick = (e) => e.stopPropagation();
+            input.oninput = (e) => {
+                settings[key] = e.target.value;
+            };
+            input.onchange = () => { saveSettings(); renderItems(container); };
+
+        }
+        // Float/Slider Logic (Smooth Speed)
+        else if (key === 'smoothSpeed') {
             item.innerHTML = `<span class="modie-key"></span><span style="flex-grow:1">Smoothness</span><span class="modie-val on">${settings[key].toFixed(2)}</span>`;
             item.onclick = () => {
                 let v = settings.smoothSpeed + 0.1;
                 if (v > 1.0) v = 0.1;
                 settings.smoothSpeed = v;
+                saveSettings(); // Save on change
                 renderItems(container);
             };
-        } else {
+        }
+        // Boolean Toggle Logic
+        else {
+            item.onclick = () => {
+                settings[key] = !settings[key];
+                saveSettings(); // Save on change
+                renderItems(container);
+            };
             item.innerHTML = `<span class="modie-key">${keyBind}</span><span style="flex-grow:1">${formatName(key)}</span><span class="modie-val ${settings[key] ? 'on' : 'off'}">${settings[key] ? 'ON' : 'OFF'}</span>`;
         }
         container.appendChild(item);
@@ -109,7 +194,7 @@ function renderItems(container) {
 }
 function formatName(str) { return str.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()); }
 function updatePlayerCount(count) {
-    const el = document.getElementById('modie-header');
+    const el = document.getElementById('modie-title');
     if (el) {
         if (!scene) el.innerHTML = `MODIE V3.7 <span style="color:#ff5555;">(Injecting...)</span>`;
         else el.innerHTML = `MODIE V3.7 <span style="color:#fff; font-size:10px;">(Players: ${count})</span>`;
@@ -161,7 +246,7 @@ function createTextSprite(text, isTeam) {
     ctx.font = '900 40px Arial'; const width = ctx.measureText(text).width + 20;
     canvas.width = width; canvas.height = 50;
     ctx.lineWidth = 4; ctx.strokeStyle = "black";
-    ctx.fillStyle = isTeam ? "#00aaff" : "#ff0055";
+    ctx.fillStyle = isTeam ? settings.colTeam : settings.colEnemy;
     ctx.strokeText(text, 10, 38); ctx.fillText(text, 10, 38);
     const texture = new THREE.CanvasTexture(canvas);
     const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, depthTest: false, depthWrite: false, transparent: true }));
@@ -258,23 +343,6 @@ function animate() {
         window.lastKnownTeam = myTeam;
     }
 
-    if (settings.spinbot) {
-        const time = Date.now() / 100;
-        myPlayer.rotation.y = time % (Math.PI * 2);
-    }
-
-    if (cam) {
-        if (settings.thirdPerson) {
-            cam.position.z = 25;
-            cam.position.y = 5;
-            cam.position.x = 0;
-        } else {
-            if (cam.position.z > 2) {
-                cam.position.set(0, 0, 0);
-            }
-        }
-    }
-
     if (cam) {
         if (settings.chams) {
             cam.traverse(child => {
@@ -314,10 +382,10 @@ function animate() {
                         child.material.opacity = 0.6;
                     }
 
-                    if (isTeammate) child.material.emissive?.setHex(COL_TEAM);
-                    else child.material.emissive?.setHex(COL_ENEMY);
+                    if (isTeammate) child.material.emissive?.setHex(parseInt(settings.colTeam.replace('#', '0x')));
+                    else child.material.emissive?.setHex(parseInt(settings.colEnemy.replace('#', '0x')));
 
-                    child.material.color?.setHex(isTeammate ? COL_TEAM : COL_ENEMY);
+                    child.material.color?.setHex(parseInt(isTeammate ? settings.colTeam.replace('#', '0x') : settings.colEnemy.replace('#', '0x')));
 
                 } else {
                     if (child.material.wireframe) child.material.wireframe = false;
@@ -361,6 +429,7 @@ function animate() {
             } else {
                 espData.group.visible = settings.espEnabled;
                 espData.box.material = isTeammate ? boxMatTeam : boxMatEnemy;
+                espData.box.material.color.set(isTeammate ? settings.colTeam : settings.colEnemy);
 
                 if (settings.espNames && settings.espEnabled) {
                     const dist = Math.round(player.position.distanceTo(myPlayer.position));
@@ -389,30 +458,6 @@ function animate() {
             }
         }
 
-        if (settings.espLines && settings.espEnabled && !isTeammate) {
-            if (counter >= MAX_LINES) continue;
-            const startX = myPlayer.position.x;
-            const startY = myPlayer.position.y - 4;
-            const startZ = myPlayer.position.z;
-
-            const endX = player.position.x;
-            const endY = player.position.y + 6;
-            const endZ = player.position.z;
-
-            if (Number.isFinite(startX) && Number.isFinite(startY) && Number.isFinite(startZ) &&
-                Number.isFinite(endX) && Number.isFinite(endY) && Number.isFinite(endZ)) {
-
-                const color = new THREE.Color(COL_ENEMY);
-
-                linePositions.setXYZ(counter, startX, startY, startZ);
-                lineColors.setXYZ(counter, color.r, color.g, color.b);
-                counter++;
-
-                linePositions.setXYZ(counter, endX, endY, endZ);
-                lineColors.setXYZ(counter, color.r, color.g, color.b);
-                counter++;
-            }
-        }
 
         if (!isTeammate) {
             if (settings.aimbotWallCheck && !player.visible) {
@@ -444,12 +489,6 @@ function animate() {
         }
     }
 
-    if (settings.espLines && settings.espEnabled && counter > 0) {
-        line.geometry.setDrawRange(0, counter);
-        linePositions.needsUpdate = true; lineColors.needsUpdate = true;
-        line.visible = true;
-    } else { line.visible = false; }
-
     if (settings.aimbotEnabled && targetPlayer) {
         const shouldAim = !settings.aimbotOnRightMouse || rightMouseDown || (settings.autoScope && targetPlayer);
 
@@ -476,30 +515,11 @@ function animate() {
                 const targetPitch = Math.atan2(deltaY, dist);
                 const targetYaw = Math.atan2(deltaX, deltaZ) + Math.PI;
 
-                const speed = settings.smoothSpeed || 0.2;
+                const speed = (settings.humanize) ? (settings.smoothSpeed || 0.2) : 1;
                 myPlayer.rotation.y = lerpAngle(myPlayer.rotation.y, targetYaw, speed);
                 myPlayer.children[0].rotation.x = lerp(myPlayer.children[0].rotation.x, targetPitch, speed);
 
                 if (settings.autoScope && !rightMouseDown) {
-                }
-            }
-        }
-    }
-
-    if (settings.autoReload) {
-        const ammoEl = document.getElementById('ammoVal') ||
-            document.getElementById('ammoDisplay') ||
-            document.getElementById('currentAmmo') ||
-            document.getElementById('ammo');
-
-        if (ammoEl) {
-            const ammoText = ammoEl.innerText || '';
-            const ammo = parseInt(ammoText);
-
-            if (!isNaN(ammo) && ammo < 10) {
-                if (!targetPlayer) {
-                    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyR' }));
-                    window.dispatchEvent(new KeyboardEvent('keyup', { code: 'KeyR' }));
                 }
             }
         }

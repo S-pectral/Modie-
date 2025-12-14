@@ -1,73 +1,54 @@
-# 🎯 MODIE V3.7 - Advanced Krunker.io Script
+# MODIE: Krunker.io Enhancement Suite V3.7
 
-> **Created by Spectral.**
-
-    MODIE is a legit-focused, high-performance script for Krunker.io designed for stealth and utility. It features a robust Aimbot with visibility checks, improved ESP, and "Humanized" smoothing options to look natural.
+**A robust, feature-rich enhancement script for Krunker.io.**
+*Optimized for performance, stealth, and customization.*
 
 ## ✨ Key Features
 
-### 🔫 Aimbot
-*   **Visibility Priority:** Targets visible enemies first. If no one is visible, it falls back to wall-banging the closest target.
+### 🎯 Advanced Aimbot
+- **360° lock-on**: Automatically targets the **closest** enemy, regardless of where you are looking.
+- **Aggressive Mode**: Disable "Humanize" for instant, snap-to-target aiming.
+- **Smart Offset**: Targets strictly at head height to avoid locking onto arms or weapons.
+- **Smoothing**: Adjustable "Humanize" factor for legit-looking setups.
 
-*   **Humanized Smoothing:** Optional smoothing to simulate real mouse movement.
+### 👁️ Visuals (ESP)
+- **3D ESP Boxes**: Clean, wireframe boxes around players.
+- **Chams (Wallhack)**: See players through walls with customizable opacity and team checks.
+- **Dynamic Text**: Displays Name, Health, and Distance.
+- **Team Aware**: Automatically distinguishes between Teammates (Green/Blue) and Enemies (Red).
 
-### 👁️ ESP (Extra Sensory Perception)
-*   **Smart Boxes:** 3D Boxes that resize to fit the player (e.g. Crouching).
-*   **Info Display:** Shows `Name`, `Health`, and `Distance` clearly.
-*   **Chams:** See enemies through walls with a ghostly overlay.
-*   **Wireframe:** Matrix-style wireframe mode.
+### 🎨 Modern UI
+- **Tabbed Menu**: Clean, dark-mode interface with "Main" and "Config" tabs.
+- **Color Pickers**: Fully customize **Enemy** and **Team** colors directly from the menu.
+- **Persistence**: All settings (colors, toggles, speeds) are **saved automatically** and restored on reload.
+- **Draggable & Collapsible**: Press `[F1]` or `[Backquote]` to toggle.
 
-### 🛡️ Protection & Misc
-*   **Team Check:** Advanced logic to prevent locking onto teammates.
-*   **FOV Circle:** Visualizes the aimbot's scanning radius.
-*   **Spinbot:** (Fun/Rage) Spin around to look cool (or confusing).
-*   **Third Person:** Unlock the camera view.
+## ⌨️ Controls
 
----
+| Key | Function |
+| :--- | :--- |
+| **B** | Toggle Aimbot |
+| **U** | Toggle "Aim on Right Mouse" |
+| **M** | Toggle ESP (Master Switch) |
+| **L** | Toggle Chams |
+| **K** | Toggle Wireframe Mode |
+| **H** | Toggle Humanize (Smooth Aim) |
+| **9** | Toggle FOV Circle |
+| **F1** / **`** | **Open/Close Menu** |
 
 ## 🚀 Installation
 
-1.  **Install Tampermonkey Extension**
-    *   [Chrome](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo) | [Firefox](https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/)
+1. Install a Userscript Manager (Tampermonkey, Greasemonkey, etc.).
+2. Create a new script.
+3. Copy the contents of `modie.js`.
+4. Save and enable.
+5. Open Krunker.io and dominate.
 
-2.  **Install Script**
-    *   Click on the `modie.js` file in this repository.
-    *   Click the **Raw** button.
-    *   Tampermonkey will prompt you to install. Click **Install**.
-
-3.  **Play!**
-    *   Open [Krunker.io](https://krunker.io).
-    *   Press **F1** or **"** (Key under ESC) to toggle the menu.
-
-4.  **Troubleshooting (Important!)**
-    *   **Menu Won't Open?**
-    *   Go to your Browser's **Extension Settings**.
-    *   Enable **Developer Mode** (Geliştirici Modu).
-    *   This is required for the script to function correctly!
+## ⚙️ Configuration
+Open the menu (`F1`) to adjust:
+- **Smoothness**: Lower = Faster (0.1 is very snappy).
+- **Colors**: Click the color box to choose any color for enemies/teammates.
+- **Humanize**: Turn OFF for "Rage" mode (Instant Lock).
 
 ---
-
-## 🎮 Controls
-
-| Key | Feature | Description |
-| :--- | :--- | :--- |
-| **F1 / " (Tr: é)** | **Toggle Menu** | Open/Close the cheat menu (`F1` or the key under `ESC`) |
-| **B** | Aimbot Main | Toggle the entire Aimbot system |
-| **Right Click** | Aim Lock | Hold to aim at target. |
-| **Numpad 5** | Wall Check | Toggle locking through walls (Default: ON) |
-| **M** | ESP Master | Toggle all visual ESP |
-| **N** | ESP Lines | Draw lines to enemies |
-| **L** | Chams | Toggle See-through walls (Ghost Mode) |
-| **K** | Wireframe | Toggle Wireframe mode |
-| **H** | Humanize | Toggle Smooth Aim (Look Legit) |
-| **O** | Third Person | Switch camera view |
-| **P** | Spinbot | Spin character (Cosmetic) |
-| **T** | Auto Reload | Helper utility |
-| **Digit 9** | FOV Circle | Show/Hide the green aim circle |
-| **U** | Right Click Mode | Toggle "Aimbot on Right Mouse" behavior |
-| **J** | ESP Names | Toggle Name/Health text overhead |
-
----
-
-## ⚠️ Disclaimer
-This software is for **Educational Purposes Only**. Using this in public matches may violate the game's Terms of Service and lead to account bans. The developer is not responsible for any consequences of using this software. Use at your own risk.
+*Disclaimer: Use at your own risk. This software is for educational purposes only.*
