@@ -1,24 +1,37 @@
 # MODIE: Krunker.io Enhancement Suite V3.7
 
-**A robust, feature-rich enhancement script for Krunker.io.**
-*Optimized for performance, stealth, and customization.*
+# Modie - Krunker Cheat (V3.8 Hybrid)
 
-## ✨ Key Features
+The **Ultimate** Krunker.io cheat script, combining the best features of leading scripts into one stable, high-performance package.
 
-### 🎯 Advanced Aimbot
-- **360° lock-on**: Automatically targets the **closest** enemy, regardless of where you are looking.
-- **Aggressive Mode**: Disable "Humanize" for instant, snap-to-target aiming.
-- **Smart Offset**: Targets strictly at head height to avoid locking onto arms or weapons.
-- **Smoothing**: Adjustable "Humanize" factor for legit-looking setups.
+## 🌟 New in V3.8
+- **Sticky Targeting**: Locks onto targets intelligently (no more jitter!).
+- **Hybrid Aimbot**: Uses precision math from `a.js` + logic from `b.js`.
+- **Modie V3.8**: Fully optimized and crash-free.
 
-### 👁️ Visuals (ESP)
-- **3D ESP Boxes**: Clean, wireframe boxes around players.
-- **Chams (Wallhack)**: See players through walls with customizable opacity and team checks.
-- **Dynamic Text**: Displays Name, Health, and Distance.
-- **Team Aware**: Automatically distinguishes between Teammates (Green/Blue) and Enemies (Red).
+## 🚀 Features
 
-### 🎨 Modern UI
-- **Tabbed Menu**: Clean, dark-mode interface with "Main" and "Config" tabs.
+### 🎯 Aimbot
+- **Sticky Lock**: Stays on target until dead or hidden.
+- **Head Precision**: Hardcoded bone targeting (+2.0 offset) for maximum accuracy.
+- **Smoothness**: Fully adjustable humanize settings.
+- **Wall Check**: Only aims at visible enemies.
+
+### 👁️ ESP (Visuals)
+- **Tracers**: Snaplines from crosshair to enemies.
+- **Box ESP**: Dynamic 2D/3D boxes.
+- **Nametags**: See names, health, and distance.
+- **Chams**: Wireframe and Rainbow modes.
+
+### ⚙️ Misc
+- **FOV Circle**: Visual draw radius.
+- **Menu**: Draggable, Collapsible, Persistent Settings.
+
+## 🛠️ Usage
+1. Install **Tampermonkey** extension.
+2. Create a new script and paste the code from `modie.js`.
+3. Open Krunker.io.
+4. Press **F1** or **`** (Backquote) to toggle the menu.
 - **Color Pickers**: Fully customize **Enemy** and **Team** colors directly from the menu.
 - **Persistence**: All settings (colors, toggles, speeds) are **saved automatically** and restored on reload.
 - **Draggable & Collapsible**: Press `[F1]` or `[Backquote]` to toggle.
